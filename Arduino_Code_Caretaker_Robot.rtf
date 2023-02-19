@@ -1,0 +1,2517 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\froman\fcharset0 Times-Roman;\f2\fswiss\fcharset0 Helvetica-Bold;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}}{\leveltext\leveltemplateid1\'01\'00;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid1}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs32 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 /* Written by Catherine Zhou and Stephanie Martinez
+\f1\fs24 \
+
+\f0\fs32 \'a0* Purpose: display daily check-up questions and store answers and give suggestions based on answers
+\f1\fs24 \
+
+\f0\fs32 \'a0* Input: yes or no using buttons
+\f1\fs24 \
+
+\f0\fs32 \'a0* Output: questions and suggestions
+\f1\fs24 \
+
+\f0\fs32 \'a0* Part of the MEDIC
+\f1\fs24 \
+
+\f0\fs32 \'a0*/
+\f1\fs24 \
+\
+\
+
+\f0\fs32 #include <LiquidCrystal.h> //for lcd functions
+\f1\fs24 \
+
+\f0\fs32 LiquidCrystal lcd1(13,12,11,10,9,8); //setting up lcd1
+\f1\fs24 \
+
+\f0\fs32 LiquidCrystal lcd2(7,6,5,4,3,2); //setting up lcd2
+\f1\fs24 \
+\
+
+\f0\fs32 //set up buttons
+\f1\fs24 \
+
+\f0\fs32 int button[] = \{0,1\}; //green is 0, red is 1
+\f1\fs24 \
+
+\f0\fs32 //functions
+\f1\fs24 \
+
+\f0\fs32 void clearl(); //clear lcd screens
+\f1\fs24 \
+
+\f0\fs32 void questionnaire(); //4 questions
+\f1\fs24 \
+
+\f0\fs32 void Gbutton(); //check if green button is pressed
+\f1\fs24 \
+
+\f0\fs32 int gyes = 0; //counter for yes in gbutton
+\f1\fs24 \
+
+\f0\fs32 void Rbutton(); //check if red button is pressed
+\f1\fs24 \
+
+\f0\fs32 void sub_questions();
+\f1\fs24 \
+
+\f0\fs32 //questionnaire() variables/counters
+\f1\fs24 \
+
+\f0\fs32 int ques = 0; // keep track of which question is displayed
+\f1\fs24 \
+
+\f0\fs32 int ques_complete = 0; // keep track of when questionnaire is done
+\f1\fs24 \
+
+\f0\fs32 int print_ques = 0; // keep track if a question is printed
+\f1\fs24 \
+
+\f0\fs32 ///////////////////////////// Setup Counters
+\f1\fs24 \
+
+\f0\fs32 int sub_ques = 0; // sub-questionnaire initializer
+\f1\fs24 \
+
+\f0\fs32 int sub_q_1 = 0; \'a0 // sub questions for Q1
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0// For now, will have 1 sub Q
+\f1\fs24 \
+
+\f0\fs32 int sub_q_2 = 0; \'a0 // sub questions for Q2
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0// For now, will have 3 sub Q\'92s
+\f1\fs24 \
+
+\f0\fs32 int sub_q_3 = 0; \'a0 // sub questions for Q3
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0// For now, will have 2 sub Q\'92s
+\f1\fs24 \
+
+\f0\fs32 int sub_q_4 = 0; \'a0 // sub questions for Q4
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0// For now, will have 2 sub Q\'92s
+\f1\fs24 \
+
+\f0\fs32 /// for pain rank function
+\f1\fs24 \
+
+\f0\fs32 int pain_ct = 0;\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // Keeps track of pain value
+\f1\fs24 \
+
+\f0\fs32 int pain_rank_start = 0; // initiates pain rank function
+\f1\fs24 \
+
+\f0\fs32 /// for part of day function
+\f1\fs24 \
+
+\f0\fs32 int partDay_ct = 0; // 0 = Morning, 1 = Afternoon, 2 = Night
+\f1\fs24 \
+\
+\
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+\
+
+\f0\fs32 void setup() \{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.begin(16,2); //length of characters and height of characters
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.clear();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.begin(16,2);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.clear();;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0//set up button pins
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0pinMode(button[1], INPUT_PULLUP);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0pinMode(button[2], INPUT_PULLUP);
+\f1\fs24 \
+
+\f0\fs32 \}
+\f1\fs24 \
+\
+\
+
+\f0\fs32 void loop() \{
+\f1\fs24 \
+
+\f0\fs32 //press green button to start
+\f1\fs24 \
+
+\f0\fs32 if (digitalRead(button[0])==LOW)\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0delay(1000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0questionnaire(); //run main questions
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0//show suggestions based on answers
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0if (ques_complete ==1)\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0// if yes was answered for any questions
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (gyes != 0)\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0//print suggestion on lcd screens
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("Please contact a");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("physician. ");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("Continue to");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("monitor yourself. ");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(10000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0clearl();
+\f1\fs24 \
+
+\f0\fs32 \'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0else if (gyes == 0)\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0//if all questions were answered with no
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("Thank you!");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("Have a ");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("good day! ");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(10000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0clearl();
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0ques_complete = 0; //reset
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0gyes = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0sub_ques = 0; // reset
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0sub_q_1 = 0; \'a0 // reset
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0sub_q_2 = 0; \'a0 // reset
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0sub_q_3 = 0; \'a0 // reset
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0sub_q_4 = 0; \'a0 // reset
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \}
+\f1\fs24 \
+
+\f0\fs32 \}
+\f1\fs24 \
+\
+
+\f0\fs32 //function to clear both lcds
+\f1\fs24 \
+
+\f0\fs32 void clearl()\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.clear();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.clear();
+\f1\fs24 \
+
+\f0\fs32 \}
+\f1\fs24 \
+\
+
+\f0\fs32 ///////////////////////////BUTTONS//////////////////////////////
+\f1\fs24 \
+
+\f0\fs32 void Gbutton()\{
+\f1\fs24 \
+
+\f0\fs32 // Functionality for when the user is in a questionnaire but NOT answering sub questions.
+\f1\fs24 \
+
+\f0\fs32 // sub_ques will == 0 (reset) after each set of subquestions
+\f1\fs24 \
+
+\f0\fs32 // MAIN QUESTION MODE
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0if (digitalRead(button[0])==LOW && ques > 0 && sub_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(ques == 4 && sub_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_ques = 1;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0ques++; //\'a0 Green button is pressed\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Serial.println("Yes");\'a0 //Record response
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0print_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0gyes++; //record if yes is answered
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0clearl();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0// In main question and answers YES to EITHER Q\'92s 1-4.
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0if (ques < 5 && ques > 0 && sub_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_ques = 1; // initialize sub questions
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\} // this chunk of code isn\'92t used when sub_ques = 1.
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0// SUB QUESTION MODE
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0if(sub_ques > 0)\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0// How Green button functions when sub_ques > 0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0// QUESTION 1 :
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0if (digitalRead(button[0])==LOW && ques == 1)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_1++; // If response is YES and in main question 1\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Serial.println("Yes");\'a0 //Record response
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0gyes++; //record if yes is answered
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0print_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0clearl();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0while(sub_q_1 == 3) // if on last sub question of Q2 go back to main
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_1++;\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}\'a0
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0// QUESTION 2 :
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0if (digitalRead(button[0])==LOW && ques == 2)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0sub_q_2++; // If response is YES and in question 1 of questionnaire\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Serial.println("Yes");\'a0 //Record response
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0gyes++; //record if yes is answered
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0print_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0clearl();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0while(sub_q_2 == 3) // if on last sub question of Q2 go back to main
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_2++;\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}\'a0
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0// QUESTION 3 :
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0if (digitalRead(button[0])==LOW && ques == 3)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0sub_q_3++; // If response is YES and in question 1 of questionnaire\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Serial.println("Yes");\'a0 //Record response
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0gyes++; //record if yes is answered
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0print_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0clearl();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0while(sub_q_3 == 3)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_3++;\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}\'a0
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0// QUESTION 4 :
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0if (digitalRead(button[0])==LOW && ques == 4)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0sub_q_4++; // If response is YES and in question 1 of questionnaire\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Serial.println("Yes");\'a0 //Record response
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0gyes++; //record if yes is answered
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0print_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0clearl();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0while(sub_q_4 == 2)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_4++;\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}\'a0
+\f1\fs24 \
+
+\f0\fs32 \}
+\f1\fs24 \
+
+\f0\fs32 \}
+\f1\fs24 \
+\
+\
+
+\f0\fs32 //////////////////////////////////////////////////// RED BUTTON
+\f1\fs24 \
+
+\f0\fs32 void Rbutton()\{
+\f1\fs24 \
+
+\f0\fs32 // MAIN QUESTION MODE\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 if (digitalRead(button[1])==LOW\'a0 && ques > 0 && sub_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0ques++; // Red button is pressed
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Serial.println("No");\'a0 //Record response
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0print_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0clearl();\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+\
+
+\f0\fs32 // SUB QUESTION MODE
+\f1\fs24 \
+
+\f0\fs32 if(sub_ques > 0)\'a0
+\f1\fs24 \
+
+\f0\fs32 // How Red button functions when sub_ques > 0
+\f1\fs24 \
+
+\f0\fs32 \{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0// QUESTION 1
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0if (digitalRead(button[1])==LOW && ques == 1)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_1++;\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // If response is NO and in question 1 of questionnaire\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Serial.println("No"); \'a0 \'a0 \'a0 //Record response
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0print_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0clearl();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0while(sub_q_1 == 3)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_1++;\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}\'a0
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0// QUESTION 2
+\f1\fs24 \
+
+\f0\fs32 if (digitalRead(button[1])==LOW && ques == 2)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_2++; \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // If response is NO and in question 2 of questionnaire\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Serial.println("No"); \'a0 \'a0 \'a0 //Record response
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0print_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0clearl();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0while(sub_q_2 == 3)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_2++;\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}\'a0
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0// QUESTION 3
+\f1\fs24 \
+
+\f0\fs32 if (digitalRead(button[1])==LOW && ques == 3)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_3++; \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // If response is NO and in question 3 of questionnaire\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Serial.println("No"); \'a0 \'a0 \'a0 //Record response
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0print_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0clearl();
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0while(sub_q_3 == 3)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_3++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0while(sub_q_3 == 3)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_3++;\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}\'a0
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0\'a0\'a0// QUESTION 4
+\f1\fs24 \
+
+\f0\fs32 if (digitalRead(button[1])==LOW && ques == 4)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_4++; \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // If response is NO and in question 4 of questionnaire\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Serial.println("No");\'a0 \'a0 \'a0 \'a0 \'a0 //Record response
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0print_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0clearl();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0while(sub_q_4 == 2)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_4++;\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}\'a0
+\f1\fs24 \
+
+\f0\fs32 \}\}
+\f1\fs24 \
+\
+
+\f0\fs32 ///////////////////// PAIN RANK FUNCTION
+\f1\fs24 \
+
+\f0\fs32 void pain_rank()
+\f1\fs24 \
+
+\f0\fs32 \{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0pain_ct = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0pain_rank_start++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0while (sub_q_1 == 1 && pain_rank_start > 0) // while on sub question #1 for main question #1
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0lcd1.print(String("Pain Scale: ") + String(pain_ct));
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if (digitalRead(button[1])==LOW) // if red button is pressed
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0pain_ct++; \'a0 \'a0 \'a0 // the pain value increases by 1
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0delay(1000); \'a0 \'a0 // to prevent pain_val from increasing a lot at once if button is held down
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0if(pain_ct > 10) // if pain value > 10 & button is pressed, go back to pain_val = 0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0pain_ct = 0; // reset pain value
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.print(" \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 ");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.print(String("Pain Scale: ") + String(pain_ct)); // display pain scale
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0\'a0\'a0if (digitalRead(button[0])==LOW)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0// if green button is pressed\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0sub_q_1++;\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // head to next sub question\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0delay(2000);\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // to prevent sub_q1_1 from increasing a lot at once
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0pain_rank_start = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0Serial.println(pain_ct);\'a0 //Record Question
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0delay(100);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0clearl();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0print_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 ////////////////////////////////////PartDay Function
+\f1\fs24 \
+
+\f0\fs32 void choose_partDay()
+\f1\fs24 \
+
+\f0\fs32 \{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0partDay_ct++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0while (sub_q_1 == 2 || sub_q_3 == 2)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\{\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0// while either on sub question #2 for Q1 or sub question #2 for Q3\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0if(partDay_ct == 1)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("Morning?");\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0if (partDay_ct == 2)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("Afternoon?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0if (partDay_ct == 3)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("Night?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0///////// Red button is pressed
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0if (digitalRead(button[1])==LOW) // if red button is pressed
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.print(" \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 ");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0partDay_ct++;\'a0 // the pain value increases by 1
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(1000); // to prevent pain_val from increasing a lot at once\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (partDay_ct > 3) // if day > 2 & button is pressed, go back to partDay_ct = 0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0partDay_ct = 1;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.print(" \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 ");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0////////// Green button is pressed
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(digitalRead(button[0])==LOW) // if green button is pressed
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0if(ques == 1)\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_1++;\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // If response is NO and in question 1 of questionnaire\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0clearl();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if(ques == 3)\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_q_3++;\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // If response is NO and in question 1 of questionnaire\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sub_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0clearl();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(partDay_ct == 1 && sub_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0Serial.println("Morning");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0print_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(partDay_ct == 2 && sub_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0Serial.println("Afternoon");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0print_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(partDay_ct == 3 && sub_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0Serial.println("Night");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0print_ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+\
+
+\f0\fs32 //////////// SUB QUESTIONNAIRE FUNCTION
+\f1\fs24 \
+
+\f0\fs32 void sub_questions()
+\f1\fs24 \
+
+\f0\fs32 \{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0while(sub_ques > 0) \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // initiate sub mode
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0ques--; // to start on question 1 sub questions
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0// QUESTION 1
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0while(ques == 1)\'a0 \'a0 // If on main question 1
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0while(sub_q_1 == 0)\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // sub Q #1
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Serial.println("Is it a sharp or dull pain?"); // Record Question!
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("Is it a sharp or");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("or dull pain?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("G (right): Sharp");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("R (left): Dull");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Gbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Rbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\} \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 //\'a0 head back to Main questionnaire
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0while(sub_q_1 == 1)\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // sub Q #2
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Serial.println("Rank the pain from 0-10."); // Record Question!
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("Rank pain 0-10");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,0);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0pain_rank();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0while(sub_q_1 == 2)\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // sub Q #3
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Serial.println("Does this occur around the morning, afternoon, or night?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("What time of day?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,0);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(100);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0choose_partDay();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0break;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\}\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // end sub Q\'92s for Q1
+\f1\fs24 \
+\
+
+\f0\fs32 // QUESTION 2\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0while(ques == 2\'a0 && sub_ques > 0)\'a0 \'a0 \'a0 // If on main question 2\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\{\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0while(sub_q_2 == 0 ) \'a0 // sub Q #1
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0Serial.println("Does this occur with specific activities?"); // Record Question!
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("Does this occur");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("w/ activities?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0Gbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0Rbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0while(sub_q_2 == 1)\'a0 // sub Q #2
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Serial.println("Is this common for you?"); // Record Question!
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("Is this");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("common for you?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Gbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Rbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0while(sub_q_2 == 2)\'a0 \'a0 // sub Q #3
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0Serial.println("Does this wake you up at night?"); // Record Question!
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.print("Does this wake");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.print("you at night?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Gbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Rbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0delay(100);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0ques++;\'a0 //\'a0 head back to Main questionnaire
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0break;
+\f1\fs24 \
+
+\f0\fs32 \} // end sub Q\'92s for Q2
+\f1\fs24 \
+\
+
+\f0\fs32 // QUESTION 3
+\f1\fs24 \
+
+\f0\fs32 while(ques == 3 && sub_ques > 0)\'a0 // If on main question 3
+\f1\fs24 \
+
+\f0\fs32 \{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0while(sub_q_3 == 0)\'a0 \'a0 // sub Q #1
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Serial.println("Is this sudden or gradual?");\'a0 //Record Question
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("Is this sudden");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("or gradual?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("G (right):Sudden");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("R (left):Gradual");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Gbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Rbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0while(sub_q_3 == 1) \'a0 \'a0 // sub Q #2
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0Serial.println("Is this common for you?");\'a0 //Record Question
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("Is this common");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("for you?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Gbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Rbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0while(sub_q_3 == 2) \'a0 \'a0 // sub Q #3
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0Serial.println("Does this occur around the morning, afternoon, or night?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("What time of day?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,0);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(100);\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0choose_partDay(); \'a0 // choose part of day\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0ques++;\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 //\'a0 head back to Main questionnaire
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0break;
+\f1\fs24 \
+
+\f0\fs32 \} // end sub Q\'92s for Q3
+\f1\fs24 \
+\
+
+\f0\fs32 // QUESTION 4
+\f1\fs24 \
+
+\f0\fs32 while(ques==4 && sub_ques>0 ) \'a0 // If on main question 4
+\f1\fs24 \
+
+\f0\fs32 \{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0while(sub_q_4 == 0) \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // sub Q #1
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0Serial.println("Does this occur w/ specific activities?");\'a0 //Record Question
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("Does this occur");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("w/ activities?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Gbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Rbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0while(sub_q_4 == 1) \'a0 \'a0 // sub Q #2
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Serial.println("Is this common for you?");\'a0 //Record Question
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("Is this common");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd1.print("for you?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Gbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0\'a0\'a0Rbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0ques++;\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0break;\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \} // end sub Q\'92s for Q4
+\f1\fs24 \
+\
+
+\f0\fs32 \}\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // end while loop for sub_ques == 1
+\f1\fs24 \
+
+\f0\fs32 \}\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 // end sub_questionnaire()
+\f1\fs24 \
+\
+\
+
+\f0\fs32 \'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0////////////////////////////////////////////////////////QUESTIONNAIRE
+\f1\fs24 \
+
+\f0\fs32 void questionnaire()
+\f1\fs24 \
+
+\f0\fs32 \{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0if(ques_complete == 0) // If the questionnaire has not been completed
+\f1\fs24 \
+
+\f0\fs32 \{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0ques = 1; // initialize questionnaire loop
+\f1\fs24 \
+
+\f0\fs32 \}
+\f1\fs24 \
+
+\f0\fs32 \'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0// 2nd LCD is not included (bc I don't have one)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0// Q1:
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0while (ques == 1)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Serial.println("Do you feel chest pain?");\'a0 //Record Question
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.print("Do you feel");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.print("chest pain?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0Gbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0Rbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0sub_questions();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0// Q2:
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0while (ques == 2)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Serial.println("Is it hard to catch your breath?");\'a0 //Record Question
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.print("Is it hard to");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.print("catch ur breath?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Gbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Rbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0sub_questions();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0// Q3:
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0while (ques == 3)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Serial.println("Do you feel tired/lethargic?");\'a0 //Record Question
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.print("Do you feel");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.print("tired/lethargic?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Gbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Rbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0sub_questions();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0// Q4:
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0while (ques == 4)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Serial.println("Do you feel your heart racing?");\'a0 //Record Question
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.print("Do you feel your");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.print("heart racing?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Gbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Rbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0sub_questions();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0while (ques == 5)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Serial.println("Do you need help w/ daily tasks?");\'a0 //Record Question
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.print("Do you need help");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.print("w/ daily tasks?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Gbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Rbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0while (ques == 6)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0if(print_ques == 0)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Serial.println("Do you feel depressed?");\'a0 //Record Question
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0print_ques++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.print("Do you feel");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.setCursor(0, 1);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd1.print("depressed?");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.setCursor(0, 0);\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.print("G (right): Yes");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.setCursor(0,1);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0lcd2.print("R (left): No");
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0delay(100);\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Gbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Rbutton();
+\f1\fs24 \
+
+\f0\fs32 \'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+\
+
+\f0\fs32 \'a0\'a0//questions are complete
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0if (ques == 7)\{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0ques = 0;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\'a0\'a0ques_complete++;
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \}
+\f1\fs24 \
+\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls1\ilvl0
+\f2\b\fs32 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	1	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Arduino Code for Pill Dispenser\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b0 \cf0 /*written by Ines Sereno and Jessica Chung
+\f1\fs24 \
+
+\f0\fs32 \'a0Code for Pill dispenser*/
+\f1\fs24 \
+
+\f0\fs32 //PIN VARIABLES
+\f1\fs24 \
+
+\f0\fs32 //the motor will be controlled by the motor A pins on the motor driver
+\f1\fs24 \
+
+\f0\fs32 const int AIN1 = 13; \'a0 \'a0 \'a0 	//control pin 1 on the motor driver for the right motor
+\f1\fs24 \
+
+\f0\fs32 const int AIN2 = 12;\'a0 \'a0 \'a0 \'a0 	//control pin 2 on the motor driver for the right motor
+\f1\fs24 \
+
+\f0\fs32 const int PWMA = 11;\'a0 \'a0 \'a0 \'a0 	//speed control pin on the motor driver for the right motor
+\f1\fs24 \
+
+\f0\fs32 \'a0
+\f1\fs24 \
+
+\f0\fs32 int switchPin = 7; \'a0 \'a0 \'a0 \'a0 	//switch to turn the robot on and off
+\f1\fs24 \
+
+\f0\fs32 \'a0
+\f1\fs24 \
+
+\f0\fs32 //VARIABLES
+\f1\fs24 \
+
+\f0\fs32 int motorSpeed = 0; \'a0 	//starting speed for the motor
+\f1\fs24 \
+
+\f0\fs32 \'a0
+\f1\fs24 \
+
+\f0\fs32 void setup() \{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0pinMode(switchPin, INPUT_PULLUP); \'a0 //set this as a pullup to sense whether the switch is flipped
+\f1\fs24 \
+
+\f0\fs32 \'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0//set the motor control pins as outputs
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0pinMode(AIN1, OUTPUT);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0pinMode(AIN2, OUTPUT);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0pinMode(PWMA, OUTPUT);
+\f1\fs24 \
+
+\f0\fs32 \'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0Serial.begin(9600); \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 	//begin serial communication with the computer
+\f1\fs24 \
+
+\f0\fs32 \}
+\f1\fs24 \
+
+\f0\fs32 \'a0
+\f1\fs24 \
+
+\f0\fs32 void loop() \{
+\f1\fs24 \
+
+\f0\fs32 \'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0if (digitalRead(7) == LOW) \{\'a0 \'a0 \'a0 	//if the switch is on...
+\f1\fs24 \
+
+\f0\fs32 	Serial.print("if");
+\f1\fs24 \
+
+\f0\fs32 	spinMotor(50);
+\f1\fs24 \
+
+\f0\fs32 	delay(1000);
+\f1\fs24 \
+
+\f0\fs32 	spinMotor(0);
+\f1\fs24 \
+
+\f0\fs32 	delay(5000);
+\f1\fs24 \
+
+\f0\fs32 	spinMotor(-50);
+\f1\fs24 \
+
+\f0\fs32 	delay(1000);
+\f1\fs24 \
+
+\f0\fs32 	spinMotor(0);
+\f1\fs24 \
+
+\f0\fs32 	delay(60000);
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\} else \{
+\f1\fs24 \
+
+\f0\fs32 	Serial.print("else");\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 	//if the switch is off...
+\f1\fs24 \
+
+\f0\fs32 	spinMotor(0); \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 	//turn the motor off
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0
+\f1\fs24 \
+
+\f0\fs32 \'a0
+\f1\fs24 \
+
+\f0\fs32 \}
+\f1\fs24 \
+
+\f0\fs32 \'a0
+\f1\fs24 \
+
+\f0\fs32 /********************************************************************************/
+\f1\fs24 \
+
+\f0\fs32 void spinMotor(int motorSpeed)\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 	 \'a0 \'a0 //function for driving the right motor
+\f1\fs24 \
+
+\f0\fs32 \{
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0if (motorSpeed > 0) \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 	//if the motor should drive forward (positive speed)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 	digitalWrite(AIN1, HIGH); \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 	//set pin 1 to high
+\f1\fs24 \
+
+\f0\fs32 	digitalWrite(AIN2, LOW);\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 	//set pin 2 to low
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0else if (motorSpeed < 0)\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 	//if the motor should drive backward (negative speed)
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 	digitalWrite(AIN1, LOW);\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 	//set pin 1 to low
+\f1\fs24 \
+
+\f0\fs32 	digitalWrite(AIN2, HIGH); \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 	//set pin 2 to high
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0else\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 	//if the motor should stop
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\{
+\f1\fs24 \
+
+\f0\fs32 	digitalWrite(AIN1, LOW);\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 	//set pin 1 to low
+\f1\fs24 \
+
+\f0\fs32 	digitalWrite(AIN2, LOW);\'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 	//set pin 2 to low
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs32 \'a0\'a0analogWrite(PWMA, abs(motorSpeed)); \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 	//now that the motor direction is set, drive it at the entered speed
+\f1\fs24 \
+
+\f0\fs32 \}
+\f1\fs24 \
+}
