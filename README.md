@@ -14,6 +14,21 @@ With the rising COVID cases in 2021, the risk of a patient contracting the virus
 <h2>Robot Constraints: </h2>
 ● The robot could not cost more than $25. </br>
 
+<h2>Pill Box Solidworks Design: </h2>
+<p align="center">
+<img width="645" alt="PillBox_SolidWorks" src="https://user-images.githubusercontent.com/114104321/219906560-c22aa963-73a8-4c59-a95d-c45e4297ea8b.png">
+</br>
+
+<h2>Robot Casing AutoCAD Design: </h2>
+<p align="center">
+<img width="371" alt="Casing_AutoCad" src="https://user-images.githubusercontent.com/114104321/219906574-949d75b0-230b-4231-ba50-fce15296ff54.png">
+</br>
+
+<h2>Arduino Setup for LCD screen questions: </h2>
+<p align="center">
+<img width="363" alt="ArduinoSetup" src="https://user-images.githubusercontent.com/114104321/219906583-6325cd47-4c53-4a76-9ddb-b1af8a48bb79.png">
+</br>
+
 <h2>Product Description: </h2>
 ● SOS switch that initiates pill box mechanism and buzzing. </br>
 ● 3D printed pill box that has a mechanism like a locomotive trian's wheel slip behind it. </br>
@@ -21,5 +36,8 @@ With the rising COVID cases in 2021, the risk of a patient contracting the virus
 ● Data collection from wellness check answers that are saved and stored. </br> 
  
 <h2>Final Product Video: </h2>
-https://user-images.githubusercontent.com/114104321/219906346-3785638e-b49a-4e1a-bac1-47975d1e9347.mp4
+<p align="center">
+<video width="471" alt="CAD1" src="https://user-images.githubusercontent.com/114104321/219906346-3785638e-b49a-4e1a-bac1-47975d1e9347.mp4">
+<br />
+
 
