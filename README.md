@@ -31,7 +31,7 @@ With the rising COVID cases in 2021, the risk of a patient contracting the virus
 
 <h2>Product Description: </h2>
 ● SOS switch that initiates pill box mechanism and buzzing. </br>
-● 3D printed pill box that has a mechanism like a locomotive trian's wheel slip behind it. </br>
+● 3D printed pill box that has a mechanism like a locomotive train's wheel slip behind it. </br>
 ● Wellness check on an LCD screen that assesses patient's health condition and suggests next steps. </br>
 ● Data collection from wellness check answers that are saved and stored. </br> 
  
